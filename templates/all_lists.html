@@ -6,24 +6,27 @@
 
 {% block content %}
 
-{% if not todo_lists %}
-There are no TODO lists to show.
+	{% if not todo_lists %}
+		There are no TODO lists to show.
 
-{% else %}
+	{% else %}
+		<ul>
+			{% for l in todo_lists %}
+			    <li>
+			        <a href="{{ url_for('one_list',ident=l.id)}}">{{ l.title }}</a>
+			        <form method = 'POST' action = "/delete/{{ l.title }}">
+						{{ del_form.hidden_tag() }}
+			        	<br>{{ del_form.delete() }}
+			        </form>
+			    </li>
+			{% endfor %}
+		</ul>
+	{% endif %}
 
-<ul>
-{% for l in todo_lists %}
-    <li>
-        <a href="{{ url_for('one_list',ident=l.id)}}">{{ l.title }}</a>
-    </li>
-{% endfor %}
-</ul>
-{% endif %}
+	<div>
+		{% for message in get_flashed_messages() %}
+			<strong>*** {{ message }} ***</strong>
+		{% endfor %}
+	</div>
 
-<div>
-{% for message in get_flashed_messages() %}
-<strong>*** {{ message }} ***</strong>
-{% endfor %}
-</div>
-
-{% endblock %}
+	{% endblock %}

@@ -75,7 +75,8 @@ class UpdateButtonForm(FlaskForm):
 
 
 # TODO 364: Define a DeleteButtonForm class for use to delete todo items
-# class Delete
+class DeleteButtonForm(FlaskForm):
+    delete = SubmitField("Delete")
 
 
 
@@ -126,9 +127,9 @@ def index():
 # Provided - see below for additional TODO
 @app.route('/all_lists',methods=["GET","POST"])
 def all_lists():
-    # form = DeleteButtonForm()
+    delete_form = DeleteButtonForm()
     lsts = TodoList.query.all()
-    return render_template('all_lists.html',todo_lists=lsts)
+    return render_template('all_lists.html',todo_lists=lsts, del_form = delete_form)
 
 # TODO 364: Update the all_lists.html template and the all_lists view function such that there is a delete button available for each ToDoList saved.
 # When you click on the delete button for each list, that list should get deleted -- this is also addressed in a later TODO.
@@ -158,7 +159,12 @@ def update(item):
 # TODO 364: Complete route to delete a whole ToDoList
 @app.route('/delete/<lst>',methods=["GET","POST"])
 def delete(lst):
-    pass # Replace with code
+    t_d_list = TodoList.query.filter_by(title = lst).first()
+    if t_d_list:
+        db.session.delete(t_d_list)
+        db.session.commit()
+    flash("Delete list %s" % lst)
+    return redirect(url_for('all_lists'))
     # This code should successfully delete the appropriate todolist
     # Should flash a message about what was deleted, e.g. Deleted list <title of list>
     # And should redirect the user to the page showing all the todo lists
