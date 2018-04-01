@@ -1,0 +1,24 @@
+<h1>{{ todolist.title }}</h1>
+{% extends 'index.html' %}
+
+{% block nav %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<ul>
+{% for item in items %}
+    <li>
+        {{ item.description }} - Priority: {{ item.priority }} 
+    </li>
+{% endfor %}
+</ul>
+
+<div>
+{% for message in get_flashed_messages() %}
+<strong>*** {{ message }} ***</strong>
+{% endfor %}
+</div>
+
+{% endblock %}
