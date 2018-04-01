@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, session, redirect, url_for, flash, request
 from flask_script import Manager, Shell
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FloatField, TextAreaField
+from wtforms import StringField, SubmitField, FloatField, TextAreaField, IntegerField
 from wtforms.validators import Required
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
@@ -66,7 +66,8 @@ class TodoListForm(FlaskForm):
 
 # TODO 364: Define an UpdateButtonForm class for use to update todo items
 class UpdateButtonForm(FlaskForm):
-    submit = SubmitField("Delete")
+    new_priority = IntegerField("Enter new priority score", validators = [Required()])
+    submit = SubmitField("Update")
 
 
 
@@ -137,10 +138,10 @@ def all_lists():
 # Provided - see below for additional TODO
 @app.route('/list/<ident>',methods=["GET","POST"])
 def one_list(ident):
-    form = UpdateButtonForm()
+    update_form = UpdateButtonForm()
     lst = TodoList.query.filter_by(id=ident).first()
     items = lst.items.all()
-    return render_template('list_tpl.html',todolist=lst,items=items,form=form)
+    return render_template('list_tpl.html',todolist=lst,items=items,upd_form=update_form)
 # TODO 364: Update the one_list view function and the list_tpl.html view file so that there is an Update button next to each todolist item, and the priority integer of that item can be updated. (This is also addressed in later TODOs.)
 # HINT: These template updates are minimal, but that small update(s) make(s) a big change in what you can do in the app! Check out the examples from previous classes for help.
 
@@ -148,6 +149,14 @@ def one_list(ident):
 # TODO 364: Complete route to update an individual ToDo item's priority
 @app.route('/update/<item>',methods=["GET","POST"])
 def update(item):
+    item_obj = TodoItem.query.filter_by(description = item).first()
+    form = UpdateButtonForm()
+    if form.validate_on_submit() and item_obj:
+        item_obj.priority = form.new_priority.data
+        db.session.commit()
+    flash("Updated priority of %s" % item)
+    return redirect(url_for('all_lists'))
+
     pass # Replace with code
     # This code should use the form you created above for updating the specific item and manage the process of updating the item's priority.
     # Once it is updated, it should redirect to the page showing all the links to todo lists.
@@ -163,7 +172,7 @@ def delete(lst):
     if t_d_list:
         db.session.delete(t_d_list)
         db.session.commit()
-    flash("Delete list %s" % lst)
+    flash("Deleted list %s" % lst)
     return redirect(url_for('all_lists'))
     # This code should successfully delete the appropriate todolist
     # Should flash a message about what was deleted, e.g. Deleted list <title of list>
