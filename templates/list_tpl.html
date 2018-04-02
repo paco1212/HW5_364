@@ -9,14 +9,19 @@
 
 	<ul>
 	{% for item in items %}
-		<form action = "/update/{{ item.description }}" method = 'POST'>
-			{{ upd_form.hidden_tag() }}
 	    	<li>
 	        	{{ item.description }} - Priority: {{ item.priority }}
-	        	<br>{{ upd_form.new_priority.label }} {{ upd_form.new_priority() }}
-	        	{{ upd_form.submit() }}
+	        	<br>
+	        	<form action = "/update/{{ item.description }}" method = 'POST'>
+					{{ upd_form.hidden_tag() }}
+					{{ upd_form.new_priority.label }} {{ upd_form.new_priority() }}
+	        		{{ upd_form.submit() }}
+	        	</form>
+	        	<form action = "/delete_item/{{ item.description }}" method = 'POST'>
+	        		{{ del_form.hidden_tag() }}
+	        		{{ del_form.delete() }}
+	        	</form>
 	    	</li>
-	    </form>
 	{% endfor %}
 	</ul>
 
