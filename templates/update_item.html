@@ -1,1 +1,18 @@
+<h1>{{ item.description }}</h1>
+{% extends 'index.html' %}
 
+{% block nav %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+
+{{ item.description }} - Priority: {{ item.priority }}
+<form action = "" method = 'POST'>
+	{{ form.hidden_tag() }}
+	{{ form.new_priority.label }} {{ form.new_priority() }}
+	{{ form.submit() }}
+</form>
+
+
+{% endblock %}

@@ -14,7 +14,6 @@
 	        	<br>
 	        	<form action = "/update/{{ item.description }}" method = 'POST'>
 					{{ upd_form.hidden_tag() }}
-					{{ upd_form.new_priority.label }} {{ upd_form.new_priority() }}
 	        		{{ upd_form.submit() }}
 	        	</form>
 	        	<form action = "/delete_item/{{ item.description }}" method = 'POST'>
