@@ -67,7 +67,10 @@ class TodoListForm(FlaskForm):
 
 # An UpdateButtonForm class for use to update todo items
 class UpdateButtonForm(FlaskForm):
-    new_priority = IntegerField("Enter new priority score", validators = [Required()])
+    submit = SubmitField("Update")
+
+class UpdateTodoListItem(FlaskForm):
+    new_priority = IntegerField("What is the new priority score of this item", validators = [Required()])
     submit = SubmitField("Update")
 
 
@@ -111,7 +114,7 @@ def get_or_create_todolist(title, item_strings=[]):
 @app.route('/', methods=["GET","POST"])
 def index():
     form = TodoListForm()
-    if request.method=="POST":
+    if form.validate_on_submit():
         title = form.name.data
         items_data = form.items.data
         new_list = get_or_create_todolist(title, items_data.split("\n"))
@@ -130,21 +133,23 @@ def all_lists():
 @app.route('/list/<ident>',methods=["GET","POST"])
 def one_list(ident):
     update_form = UpdateButtonForm()
+    delete_form = DeleteButtonForm() # Part of additional feature
     lst = TodoList.query.filter_by(id=ident).first()
     items = lst.items.all()
-    return render_template('list_tpl.html',todolist=lst,items=items,upd_form=update_form)
+    return render_template('list_tpl.html',todolist=lst,items=items,upd_form=update_form, del_form = delete_form)
 
 
 # View function that will update an item's priority value in the Database. Once the item is updated, redirect to the page showing all the links to todo lists
 @app.route('/update/<item>',methods=["GET","POST"])
 def update(item):
     item_obj = TodoItem.query.filter_by(description = item).first()
-    form = UpdateButtonForm()
+    form = UpdateTodoListItem()
     if form.validate_on_submit() and item_obj:
         item_obj.priority = form.new_priority.data
         db.session.commit()
-    flash("Updated priority of %s" % item)
-    return redirect(url_for('all_lists'))
+        flash("Updated priority of %s" % item)
+        return redirect(url_for('all_lists'))
+    return render_template('update_item.html', form = form, item = item_obj)    
 
 
 # View function that will delete a ToDo list in the Database. Once the To Do list is deleted, redirect to the page showing all the links to To Do lists
@@ -154,7 +159,20 @@ def delete(lst):
     if t_d_list:
         db.session.delete(t_d_list)
         db.session.commit()
-    flash("Deleted list %s" % lst)
+        flash("Successfully deleted %s" % lst)
+    return redirect(url_for('all_lists'))
+     
+
+# This is my additional Feature that I am adding to this App.
+# The additional feature is: One can also delete items from a specific list without having to delete the entire list to remove some tasks from a To Do list
+# View function that will delete an item from the database and redirect to the page that shows all the links to the todo lists
+@app.route('/delete_item/<item>', methods = ['GET','POST'])
+def delete_item(item):
+    item_obj = TodoItem.query.filter_by(description = item).first()
+    if item_obj:
+        db.session.delete(item_obj)
+        db.session.commit()
+    flash("Deleted %s" % item)
     return redirect(url_for('all_lists'))
 
 
